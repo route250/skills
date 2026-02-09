@@ -89,10 +89,11 @@ SBV2_MODELS = {
             'path': 'koharune-ami/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': '小春音アミ',
+        'model_name': '小春音アミ',
+        'gender': 'female',
         'license': 'あみたろの声素材工房規約（配布元規約準拠）',
         'license_url': 'https://amitaro.net/voice/voice_rule/',
-        'usage_terms_ja': 'amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。',
+        'usage_terms': 'amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。',
     },
     "amitaro": {
         'model':{
@@ -108,10 +109,11 @@ SBV2_MODELS = {
             'path': 'amitaro/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'あみたろ',
+        'model_name': 'あみたろ',
+        'gender': 'female',
         'license': 'あみたろの声素材工房規約（配布元規約準拠）',
         'license_url': 'https://amitaro.net/voice/voice_rule/',
-        'usage_terms_ja': 'amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。',
+        'usage_terms': 'amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。',
     },
     'jvnv-F1-jp': {
         'model':{
@@ -127,10 +129,12 @@ SBV2_MODELS = {
             'path': 'jvnv-F1-jp/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'JVNV F1（日本語）',
+        'model_name': 'JVNV F1',
+        'description': 'JVNVコーパス女性話者1',
+        'gender': 'female',
         'license': 'CC BY-SA 4.0（JVNVコーパス継承）',
         'license_url': 'https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
-        'usage_terms_ja': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
+        'usage_terms': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
     },
     'jvnv-F2-jp': {
         'model':{
@@ -146,10 +150,12 @@ SBV2_MODELS = {
             'path': 'jvnv-F2-jp/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'JVNV F2（日本語）',
+        'model_name': 'JVNV F2',
+        'description': 'JVNVコーパス女性話者2',
+        'gender': 'female',
         'license': 'CC BY-SA 4.0（JVNVコーパス継承）',
         'license_url': 'https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
-        'usage_terms_ja': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
+        'usage_terms': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
     },
     'jvnv-M1-jp': {
         'model':{
@@ -165,10 +171,12 @@ SBV2_MODELS = {
             'path': 'jvnv-M1-jp/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'JVNV M1（日本語）',
+        'model_name': 'JVNV M1',
+        'gender': 'male',
+        'description': 'JVNVコーパス男性話者1',
         'license': 'CC BY-SA 4.0（JVNVコーパス継承）',
         'license_url': 'https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
-        'usage_terms_ja': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
+        'usage_terms': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
     },
     'jvnv-M2-jp': {
         'model':{
@@ -184,10 +192,12 @@ SBV2_MODELS = {
             'path': 'jvnv-M2-jp/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'JVNV M2（日本語）',
+        'model_name': 'JVNV M2',
+        'description': 'JVNVコーパス男性話者2',
+        'gender': 'male',
         'license': 'CC BY-SA 4.0（JVNVコーパス継承）',
         'license_url': 'https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
-        'usage_terms_ja': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
+        'usage_terms': 'JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
     },
     'rinne': {
         'model':{
@@ -203,12 +213,13 @@ SBV2_MODELS = {
             'path': 'model_assets/Rinne/style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'りんねおねんね',
+        'model_name': 'りんねおねんね',
+        'gender': 'female',
         'license': '配布者記載: 商用・非商用問わず利用可',
         'license_url': 'https://booth.pm/ja/items/6919603?srsltid=AfmBOooFYrF78FW-NrbuG0UZWVenOcs8010gOECKnHCUFNpjxlzmfbyC',
-        'usage_terms_ja': '配布ページ記載に基づき、商用・非商用問わず利用可能。詳細条件・最新情報は配布ページの記載を確認してください。',
+        'usage_terms': '配布ページ記載に基づき、商用・非商用問わず利用可能。詳細条件・最新情報は配布ページの記載を確認してください。',
     },
-    'girl': {
+    'NotAnimeJPManySpeaker': {
         'model':{
             'repo_id': 'Mofa-Xingche/girl-style-bert-vits2-JPExtra-models',
             'path': 'NotAnimeJPManySpeaker_e120_s22200.safetensors'
@@ -222,10 +233,10 @@ SBV2_MODELS = {
             'path': 'style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'girl（JP-Extra 多話者）',
+        'model_name': 'girl（JP-Extra 多話者）',
         'license': '要確認（配布ページ参照）',
         'license_url': 'https://huggingface.co/Mofa-Xingche/girl-style-bert-vits2-JPExtra-models',
-        'usage_terms_ja': '利用前に配布ページの利用規約とライセンスを確認し、禁止事項（再配布、商用利用、二次配布、用途制限など）を遵守してください。',
+        'usage_terms': '利用前に配布ページの利用規約とライセンスを確認し、禁止事項（再配布、商用利用、二次配布、用途制限など）を遵守してください。',
     },
     'tsukuyomi-chan': {
         'model':{
@@ -241,10 +252,11 @@ SBV2_MODELS = {
             'path': 'style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'つくよみちゃん',
+        'model_name': 'つくよみちゃん',
+        'gender': 'female',
         'license': 'つくよみちゃん利用規約（公式サイト参照）',
         'license_url': 'https://tyc.rei-yumesaki.net/about/terms/',
-        'usage_terms_ja': '利用時は公式の「つくよみちゃん利用規約」に従ってください。商用利用・再配布・クレジット要否などの詳細条件は必ず公式規約本文を確認してください。',
+        'usage_terms': '利用時は公式の「つくよみちゃん利用規約」に従ってください。商用利用・再配布・クレジット要否などの詳細条件は必ず公式規約本文を確認してください。',
     },
     'AbeShinzo': {
         'model':{
@@ -260,10 +272,12 @@ SBV2_MODELS = {
             'path': 'style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': '安倍晋三（元首相）',
+        'model_name': '安倍晋三',
+        'description': '安倍晋三元首相の音声データを用いたモデル',
+        'gender': 'male',
         'license': 'Apache License 2.0',
         'license_url': 'https://www.apache.org/licenses/LICENSE-2.0',
-        'usage_terms_ja': '安倍晋三元首相の音声データを用いたモデルです。フェイクニュース・誹謗中傷・名誉毀損につながる利用、誤解を招くコンテンツ作成は禁止。公序良俗に反する用途や権利侵害の恐れがある利用は避けてください。',
+        'usage_terms': '安倍晋三元首相の音声データを用いたモデルです。フェイクニュース・誹謗中傷・名誉毀損につながる利用、誤解を招くコンテンツ作成は禁止。公序良俗に反する用途や権利侵害の恐れがある利用は避けてください。',
     },
     'sakura-miko': {
         'model':{
@@ -279,10 +293,11 @@ SBV2_MODELS = {
             'path': 'style_vectors.npy'
             },
         'language': 'jp',
-        'model_name_ja': 'さくらみこ',
+        'model_name': 'さくらみこ',
+        'gender': 'female',
         'license': '配布者条件: 趣味の範囲で利用',
         'license_url': 'https://hololivepro.com/terms/',
-        'usage_terms_ja': 'モデルの取得や使い方は自由ですが、趣味の範囲で利用してください。詳細はカバー株式会社の二次創作ガイドライン（https://hololivepro.com/terms/）を確認してください。',
+        'usage_terms': 'モデルの取得や使い方は自由ですが、趣味の範囲で利用してください。詳細はカバー株式会社の二次創作ガイドライン（https://hololivepro.com/terms/）を確認してください。',
     }
 }
 
@@ -302,59 +317,62 @@ def to_language(lang: str|None) -> Languages:
 
 @dataclass
 class SpkOptions:
-    class_id: str = "dummy"
     model: int | str | None = None
+    model_path: str|Path|None = None
+    config_path: str|Path|None = None
+    style_vec_path: str|Path|None = None
+    model_repo: str|None = None
     speaker_id: int | None = None
     speaker_style: str | None = None
     speaker_name: str | None = None
     split: bool = False
     speedScale: float = 1.0
     pitchOffset: float = 0.0
-    lang: str = "ja-jp"
-    model_name_ja: str|None = None
+    lang: str = "ja"
+    model_name: str|None = None
+    gender: str = "unknown"
+    description: str=''
     license_name: str|None = None
     license_url: str|None = None
-    usage_terms_ja: str|None = None
-
-    def lang2str(self) -> str:
-        if self.lang.startswith("ja"):
-            return "ja"
-        if self.lang.startswith("en"):
-            return "en"
-        if len(self.lang) >= 2:
-            return self.lang[:2]
-        return self.lang
-    
-@dataclass
-class StyleBertVits2Options(SpkOptions):
-    class_id: str = "sbv2"
-    model_path: str|Path|None = None
-    config_path: str|Path|None = None
-    style_vec_path: str|Path|None = None
-    device: str|None = None
+    usage_terms: str|None = None
 
 @lru_cache(maxsize=1)
 def get_sbv2_options_list() -> dict[str,SpkOptions]:
-    def _spk_option(model_key: str, speaker_id: int|None=None) -> SpkOptions:
+    def _spk_option(model_key: str, *, speaker_id: int|None=None, model_name:str|None=None, gender:str|None=None, description:str|None=None) -> SpkOptions:
+        assert isinstance(model_key, str), f"model_key must be str, got {type(model_key)}"
         model_info = SBV2_MODELS.get(model_key, {})
+        cfg_model_name = model_name or model_info.get("model_name") or model_key
+        cfg_gender = gender if gender in ('male', 'female') else model_info.get('gender') or 'unknown'
+        cfg_description = description if description is not None else model_info.get('description') or ''
+        model_repo = model_info.get("model", {}).get("repo_id")
+        model_path = model_info.get("model", {}).get("path")
+        config_path = model_info.get("config", {}).get("path")
+        style_vec_path = model_info.get("style_vec", {}).get("path")
+        lang = model_info.get("language") or "unknown"
         return SpkOptions(
-            class_id="sbv2",
             model=model_key,
+            model_repo=model_repo,
+            model_path=model_path,
+            config_path=config_path,
+            style_vec_path=style_vec_path,
             speaker_id=speaker_id,
-            model_name_ja=model_info.get("model_name_ja"),
+            model_name=cfg_model_name,
+            gender=cfg_gender,
             license_name=model_info.get("license"),
             license_url=model_info.get("license_url"),
-            usage_terms_ja=model_info.get("usage_terms_ja"),
+            usage_terms=model_info.get("usage_terms"),
+            description=cfg_description,
+            lang=lang,
         )
-
+    XX1 = 'アニメ調じゃない日本語多話者モデル'
     return {
         "amitaro": _spk_option("amitaro", speaker_id=0),
         "koharune-ami": _spk_option("koharune-ami", speaker_id=0),
-        "amazinGood": _spk_option("girl", speaker_id=0),
-        "calmCloud": _spk_option("girl", speaker_id=1),
-        "coolcute": _spk_option("girl", speaker_id=2),
-        "fineCrystal": _spk_option("girl", speaker_id=3),
-        "lightFire": _spk_option("girl", speaker_id=4),
+        "amazinGood": _spk_option("NotAnimeJPManySpeaker", speaker_id=0, model_name="amazinGood",gender="female",description=XX1),
+        "calmCloud": _spk_option("girNotAnimeJPManySpeakerl", speaker_id=1, model_name="calmCloud",gender="female",description=XX1),
+        "coolcute": _spk_option("NotAnimeJPManySpeaker", speaker_id=2, model_name="coolcute",gender="female",description=XX1),
+        "fineCrystal": _spk_option("NotAnimeJPManySpeaker", speaker_id=3, model_name="fineCrystal",gender="female",description=XX1),
+        "lightFire": _spk_option("NotAnimeJPManySpeaker", speaker_id=4, model_name="lightFire",gender="male",description=XX1),
         "Rinne": _spk_option("rinne"),
         "AbeShinzo": _spk_option("AbeShinzo"),
         "tsukuyomi-chan": _spk_option("tsukuyomi-chan"),
@@ -380,18 +398,52 @@ def print_text_preprocess_recommendation() -> None:
 
 def print_model_detail(model_name: str, model_info: dict) -> None:
     print(f"[{model_name}]")
-    print(f"  日本語名: {model_info.get('model_name_ja', model_name)}")
+    print(f"  モデル名: {model_info.get('model_name', model_name)}")
     print(f"  言語: {model_info.get('language', 'unknown')}")
     print(f"  モデル配布: https://huggingface.co/{model_info.get('model', {}).get('repo_id', 'unknown')}")
     print(f"  ライセンス表記: {model_info.get('license', '未設定')}")
     print(f"  ライセンスURL: {model_info.get('license_url', '未設定')}")
-    print(f"  利用条件: {model_info.get('usage_terms_ja', '未設定')}")
+    print(f"  利用条件: {model_info.get('usage_terms', '未設定')}")
 
-def print_model_list():
-    print("Available models:")
-    for model_name, model_info in SBV2_MODELS.items():
-        print_model_detail(model_name, model_info)
-        print("")
+def print_models_doc() -> int:
+    options = get_sbv2_options_list()
+    print("# --modelオプションで指定できるモデルの一覧です。model-idを指定して下さい。")
+    print("|model-id|model_name|gender|lang|description|")
+    print("|---|---|---|---|---|")
+    for key, opt in options.items():
+        print(f"|{key}|{opt.model_name}|{opt.gender}|{opt.lang}|{opt.description or ''}|")
+    print("")
+    return 0
+
+def print_model_info_doc(model_id: str) -> int:
+    options = get_sbv2_options_list()
+    option = options.get(model_id)
+    if option is None:
+        print(f"モデルが見つかりません: {model_id}", file=sys.stderr)
+        return 1
+
+    model_repo = option.model_repo or "unknown"
+    model_path = option.model_path or "unknown"
+    config_path = option.config_path or "unknown"
+    style_vec_path = option.style_vec_path or "unknown"
+    language = option.lang or "unknown"
+
+    output_lines = [
+        f"# {model_id}",
+        "",
+        f"- model_name: {option.model_name or model_id}",
+        f"- language: {language}",
+        f"- model_repo: https://huggingface.co/{model_repo}",
+        f"- safetensors: {model_path}",
+        f"- config: {config_path}",
+        f"- style_vectors: {style_vec_path}",
+        f"- license: {option.license_name or '未設定'}",
+        f"- license_url: {option.license_url or '未設定'}",
+        f"- usage_terms: {option.usage_terms or '未設定'}",
+        "",
+    ]
+    print("\n".join(output_lines).rstrip())
+    return 0
 
 def main():
     parser = argparse.ArgumentParser(
@@ -404,14 +456,17 @@ def main():
     parser.add_argument("--model", default="amitaro", help="model name")
     parser.add_argument("--output", action="append", help="output wav path (repeatable)")
     parser.add_argument("--list-models", "--models", action="store_true", dest="list_models", help="list available models")
+    parser.add_argument("--model-info", metavar="MODEL_ID", help="show model info from docs")
     parser.add_argument("--spkeaker-id", type=int, default=None, help="speaker ID")
     parser.add_argument("--speed", type=float, help="speed scale")
     parser.add_argument("--sr", type=int, default=24000, help="output sample rate")
     args = parser.parse_args()
 
+    if args.model_info:
+        return print_model_info_doc(args.model_info)
+
     if args.list_models:
-        print_model_list()
-        return 0
+        return print_models_doc()
 
     texts = args.text or ["こんにちは"]
     if args.output is None:
@@ -426,6 +481,8 @@ def main():
             f"--text の数 ({len(texts)}) と --output の数 ({len(outputs)}) を一致させてください。"
         )
 
+    model_dict = get_sbv2_options_list()
+    mdl = model_dict.get(args.model)
     if not args.model:
         model_dict = SBV2_MODELS["amitaro"]
     else:

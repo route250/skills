@@ -1,0 +1,14 @@
+[project]
+name = "sbv2-script"
+version = "0.1.0"
+requires-python = ">=3.10,<3.13"
+dependencies = [
+  "style-bert-vits2==2.5.0",
+  "pyopenjtalk==0.4.1",
+  "numpy<2.0",
+  "torch<2.4",
+  "torchaudio<2.4",
+  "ctranslate2==4.6.3",
+  "transformers==4.57.3",
+  "librosa==0.11.0",
+]
