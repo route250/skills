@@ -14,10 +14,10 @@ Style-Bert-VITS2による音声生成コードと音声モデルをまとめた�
 1. `uvx` が使えるか確認する。使えない場合は `uv` を導入してから実行する。
 2. 使い方確認が必要な場合は必ず `--help` を実行する。
 3. 音声モデルは、docs/models.mdに一覧がある。ライセンス条件に留意すること。
-4. 実行は `scripts/run_sbv2_uvx.sh` を使う。音声モデルは最初に自動ダウンロードされるが少し時間がかかるかも。
+4. 実行は `/fullpath/scripts/run_sbv2_uvx.sh` を使う。音声モデルは最初に自動ダウンロードされるが少し時間がかかるかも。
 
 ```bash
-run_sbv2_uvx.sh --model amitaro --text "おはよう" --output out1.wav  --text "こんにちは" --output out2.wav
+/fullpath/script/run_sbv2_uvx.sh --model amitaro --text "おはよう" --output out1.wav  --text "こんにちは" --output out2.wav
 ```
 
 ## 読み上げ前のテキスト前処理の推奨
