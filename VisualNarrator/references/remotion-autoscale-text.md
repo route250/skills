@@ -21,7 +21,7 @@ import {fillTextBox} from '@remotion/layout-utils';
 const fit = fillTextBox({
   text,
   box: {width: boxW, height: boxH},
-  fontFamily: 'Noto Sans JP',
+  fontFamily: 'Noto Sans JP, Hiragino Sans, sans-serif',
   fontWeight: '700',
   maxFontSize: 96,
   minFontSize: 24,
@@ -31,22 +31,20 @@ const fit = fillTextBox({
 return <div style={{fontSize: fit.fontSize, lineHeight: 1.25}}>{text}</div>;
 ```
 
-## 3.1 フォント読み込み後に計測する
+## 3.1 計測フォントを固定し、失敗時フォールバックを持つ
 ```tsx
 import {measureText} from '@remotion/layout-utils';
-import {loadFont} from '@remotion/google-fonts/Inter';
-
-const {fontFamily, waitUntilDone} = loadFont('normal', {weights: ['700']});
-await waitUntilDone();
+const FONT_STACK = 'Noto Sans JP, Hiragino Sans, sans-serif';
 
 const measured = measureText({
   text,
-  fontFamily,
+  fontFamily: FONT_STACK,
   fontSize: 48,
   validateFontIsLoaded: true,
 });
 ```
-- フォント未ロード時の計測は誤差を生む。後工程で崩れる確率が高い。
+- Google Fonts を使う場合、`subset` と `weight` の実在を先に確認する。
+- `loadFont()` 失敗時は Google Fonts 依存を即時解除し、`FONT_STACK` にフォールバックする。
 
 ## 3.2 幅優先の見出しと箱優先の本文を分ける
 - 見出し: `fitText()` で幅基準の最大化を行う。
@@ -58,6 +56,7 @@ const measured = measureText({
 - 日本語長文は禁則処理より先に文圧縮を検討する。
 - 計測時と描画時で `fontFamily` / `fontWeight` / `letterSpacing` を一致させる。
 - テロップ連続表示では `Sequence` の `premountFor` を使い、レイアウト揺れを抑える。
+- 白画面発生時は UI 操作より先にプレビューログの `font` / `bundle` エラーを確認する。
 
 ## 5. 参考ソース
 - Remotion layout-utils (`fillTextBox`): https://www.remotion.dev/docs/layout-utils/fill-text-box

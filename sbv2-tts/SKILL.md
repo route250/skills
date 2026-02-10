@@ -15,8 +15,20 @@ Style-Bert-VITS2による音声生成コードと音声モデルをまとめた�
 3. `--list-models`を実行して使用する音声モデルを探し、モデルの詳細は `--model-info`で確認する。ライセンス条件に留意すること。
 4. 実行は `/fullpath/scripts/run_sbv2_uvx.sh` を使う。音声モデルは最初に自動ダウンロードされるが少し時間がかかるかも。
 
+- コマンドラインで指定する例
 ```bash
 /fullpath/script/run_sbv2_uvx.sh --model amitaro --text "おはよう" --output out1.wav  --text "こんにちは" --output out2.wav
+```
+
+- 音声化する内容をテキストファイルで指定する例(txtの拡張子をwavに変換して出力)
+```bash
+/fullpath/script/run_sbv2_uvx.sh --model amitaro ohayou.txt konnichiwa.txt
+```
+
+- 出力したwavファイルに対応するinfoファイルも自動生成される。(コマンドラインでもファイルし指定でも同様)
+音声の秒数を確認したい場合は以下のようにする。
+```bash
+grep Duration *.info
 ```
 
 ## 読み上げ前のテキスト前処理の推奨

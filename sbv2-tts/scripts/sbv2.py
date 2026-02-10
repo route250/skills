@@ -457,6 +457,7 @@ def main():
     parser.add_argument("--list-models", action="store_true", dest="list_models", help="list available models")
     parser.add_argument("--model-info", metavar="MODEL_ID", help="show model info and styles")
     parser.add_argument("--verify-models", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("files", nargs="*", metavar="TXT", help="input text file(s) (.txt)")
     args = parser.parse_args()
 
     # --list-models オプション
@@ -478,14 +479,33 @@ def main():
         return 0
 
     # 入力テキストと出力ファイルの設定
-    texts = args.text or ["こんにちは"]
-    if args.output is None:
-        if len(texts) == 1:
-            outputs = ["output.wav"]
-        else:
-            outputs = [f"output_{i + 1:03d}.wav" for i in range(len(texts))]
+    if args.files:
+        if args.text:
+            parser.error("--text と TXT ファイルは同時に指定できません。")
+        if args.output:
+            parser.error("TXT ファイル指定時は --output を使えません。")
+        texts = []
+        outputs = []
+        for file_path in args.files:
+            path = Path(file_path)
+            if path.suffix.lower() != ".txt":
+                parser.error(f"TXT ファイル以外は指定できません: {file_path}")
+            try:
+                text = path.read_text(encoding="utf-8").strip()
+            except OSError as exc:
+                print(f"TXT ファイルを読み込めません: {file_path} ({exc})", file=sys.stderr)
+                return 1
+            texts.append(text)
+            outputs.append(str(path.with_suffix(".wav")))
     else:
-        outputs = args.output
+        texts = args.text or ["こんにちは"]
+        if args.output is None:
+            if len(texts) == 1:
+                outputs = ["output.wav"]
+            else:
+                outputs = [f"output_{i + 1:03d}.wav" for i in range(len(texts))]
+        else:
+            outputs = args.output
     if len(texts) != len(outputs):
         parser.error(
             f"--text の数 ({len(texts)}) と --output の数 ({len(outputs)}) を一致させてください。"
@@ -551,6 +571,19 @@ def main():
             wf.writeframes(audio_i16.tobytes())
         num_samples = int(audio_i16.shape[0])
         duration_sec = num_samples / float(args.sr)
+        info_path_obj = output_path_obj.with_suffix(".info")
+        info_lines = [
+            f"model-id: {model.id}",
+            f"model-name: {model.name}",
+            f"style: {speaker_style}",
+            f"license: {dataset.license}",
+            f"license-url: {dataset.license_url}",
+            f"usage-terms: {dataset.usage_terms}",
+            f"text: {text}",
+            f"samples: {num_samples}",
+            f"duration-sec: {duration_sec:.3f}",
+        ]
+        info_path_obj.write_text("\n".join(info_lines) + "\n", encoding="utf-8")
         print(f"  done: {output_path_obj} monaural audio sampling rate:{args.sr} samples={num_samples} duration={duration_sec:.3f}(sec) ")
 
 if __name__ == "__main__":

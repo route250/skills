@@ -7,7 +7,7 @@
 
 ## 作成・更新するファイル
 - `progress.md`
-- `brief.md`（目的・対象・制約の確定版）
+- `brief.md`（目的・対象・制約の確定版。`制作前チェック` 欄を含める）
 
 ## 命名と配置
 - プロジェクト構造と命名は `references/project-file-conventions.md` に従う。
