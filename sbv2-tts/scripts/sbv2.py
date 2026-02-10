@@ -37,7 +37,11 @@ from numpy.typing import NDArray
 import torch
 import librosa
 
-from style_bert_vits2.constants import DEFAULT_BERT_TOKENIZER_PATHS, Languages, DEFAULT_STYLE
+from style_bert_vits2.logging import logger as sbv2_logger
+sbv2_logger.remove()  # 既存のログ設定を削除
+sbv2_logger.add(sys.stderr, level="ERROR")  # ERRORレベルのログのみを表示
+
+from style_bert_vits2.constants import DEFAULT_BERT_TOKENIZER_PATHS, Languages, DEFAULT_STYLE, DEFAULT_LENGTH
 from style_bert_vits2.nlp import bert_models
 from style_bert_vits2.tts_model import TTSModel as SBV2_TTSModel
 
@@ -91,7 +95,7 @@ class ModelInfo:
     gender: str = "unknown"
     language: Languages = Languages.JP
     description: str = ""
-    styles: dict[str, int] = field(default_factory=lambda: {'Neutral': 0})
+    styles: dict[str, int] = field(default_factory=lambda: {DEFAULT_STYLE: 0})
     speedScale: float = 1.0
     pitchOffset: float = 0.0
 
@@ -121,7 +125,7 @@ def get_datasets() -> list[DataSet]:
                 repo_id='litagin/sbv2_amitaro',
                 path='amitaro/style_vectors.npy'
             ),
-            models=[ModelInfo(id='amitaro', name='あみたろ', gender='female',styles={'Neutral':0,'01':1,'02':2,'03':3, '04': 4})],
+            models=[ModelInfo(id='amitaro', name='あみたろ', gender='female',description='配信向きかわいい声',)],
             license='あみたろの声素材工房規約（配布元規約準拠）',
             license_url='https://amitaro.net/voice/voice_rule/',
             usage_terms='amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。'
@@ -139,8 +143,8 @@ def get_datasets() -> list[DataSet]:
                 repo_id='litagin/sbv2_koharune_ami',
                 path='koharune-ami/style_vectors.npy'
             ),
-            models=[ModelInfo(id='koharune-ami', name='小春音アミ', gender='female',styles={
-                'Neutral':0, 'るんるん':1, 'ささやきA(無声)': 2, 'ささやきB(有声)': 3, 'ノーマル':4, 'よふかし':5})],
+            models=[ModelInfo(id='koharune-ami', name='小春音アミ', gender='female',description='配信向きかわいい声',
+                styles={DEFAULT_STYLE:0, 'るんるん':1, 'ささやきA(無声)': 2, 'ささやきB(有声)': 3, 'ノーマル':4, 'よふかし':5})],
             license='あみたろの声素材工房規約（配布元規約準拠）',
             license_url='https://amitaro.net/voice/voice_rule/',
             usage_terms='amitaro.netの規約（voice_rule と livevoice）を遵守。年齢制限用途・政治/宗教/マルチ・誹謗中傷用途は禁止。公開時は「あみたろの声素材工房 (https://amitaro.net/)」のクレジット表記が必要。'
@@ -159,7 +163,7 @@ def get_datasets() -> list[DataSet]:
                 path='jvnv-F1-jp/style_vectors.npy'
             ),
             models=[ModelInfo(id='jvnv-F1-jp', name='JVNV F1', gender='female', description='JVNVコーパス女性話者1',
-                              styles={'Neutral':0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
+                              styles={DEFAULT_STYLE:0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
             license='CC BY-SA 4.0（JVNVコーパス継承）',
             license_url='https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
             usage_terms='JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
@@ -178,7 +182,7 @@ def get_datasets() -> list[DataSet]:
                 path='jvnv-F2-jp/style_vectors.npy'
             ),
             models=[ModelInfo(id='jvnv-F2-jp', name='JVNV F2', gender='female', description='JVNVコーパス女性話者2',
-                              styles={'Neutral':0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
+                              styles={DEFAULT_STYLE:0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
             license='CC BY-SA 4.0（JVNVコーパス継承）',
             license_url='https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
             usage_terms='JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
@@ -197,7 +201,7 @@ def get_datasets() -> list[DataSet]:
                 path='jvnv-M1-jp/style_vectors.npy'
             ),
             models=[ModelInfo(id='jvnv-M1-jp', name='JVNV M1', gender='male', description='JVNVコーパス男性話者1',
-                              styles={'Neutral':0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
+                              styles={DEFAULT_STYLE:0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
             license='CC BY-SA 4.0（JVNVコーパス継承）',
             license_url='https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
             usage_terms='JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
@@ -216,7 +220,7 @@ def get_datasets() -> list[DataSet]:
                 path='jvnv-M2-jp/style_vectors.npy'
             ),
             models=[ModelInfo(id='jvnv-M2-jp', name='JVNV M2', gender='male', description='JVNVコーパス男性話者2',
-                              styles={'Neutral':0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
+                              styles={DEFAULT_STYLE:0, 'Angry':1, 'Disgust':2, 'Fear':3, 'Happy':4, 'Sad':5, 'suprise':6})],
             license='CC BY-SA 4.0（JVNVコーパス継承）',
             license_url='https://creativecommons.org/licenses/by-sa/4.0/deed.ja',
             usage_terms='JVNVコーパス由来のためCC BY-SA 4.0を継承。表示・継承条件を満たして利用してください。',
@@ -234,7 +238,7 @@ def get_datasets() -> list[DataSet]:
                 repo_id='RinneAi/Rinne_Style-Bert-VITS2',
                 path='model_assets/Rinne/style_vectors.npy'
             ),
-            models=[ModelInfo(id='rinne', name='りんねおねんね', gender='female')],
+            models=[ModelInfo(id='rinne', name='りんねおねんね', gender='female', description='すこし幼い可愛い声')],
             license='配布者記載: 商用・非商用問わず利用可',
             license_url='https://booth.pm/ja/items/6919603?srsltid=AfmBOooFYrF78FW-NrbuG0UZWVenOcs8010gOECKnHCUFNpjxlzmfbyC',
             usage_terms='配布ページ記載に基づき、商用・非商用問わず利用可能。詳細条件・最新情報は配布ページの記載を確認してください。',
@@ -253,16 +257,16 @@ def get_datasets() -> list[DataSet]:
                 path='style_vectors.npy'
             ),
             models=[
-                ModelInfo(id='amazinGood', name='amazinGood', spker_id=0, gender='female',description='落ち着いた女性の声',
-                          styles={'Neutral':4, 'down':1, 'lol':2, 'ohmygod':3}),
-                ModelInfo(id='calmCloud', name='calmCloud', spker_id=1, gender='female',description='落ち着いた女性の声',
-                          styles={'Neutral':10, 'lol':5, 'question':6, 'down':7, 'hate': 8, 'ohmygod':9}),
-                ModelInfo(id='coolcute', name='coolcute', spker_id=2, gender='female',description='落ち着いた女性の声',
-                          styles={'Neutral':12, 'ohmygod':11, 'fine':13, 'sad':14}),
-                ModelInfo(id='fineCrystal', name='fineCrystal', spker_id=3, gender='female',description='落ち着いた女性の声',
-                          styles={'Neutral':18, 'fine':15, 'ohmygod':16, 'veryfine':17, 'sad':19}),
-                ModelInfo(id='lightFire', name='lightFire', spker_id=4, gender='male',description='落ち着いた男性の声',
-                          styles={'Neutral':22, 'question':20, 'hello':21, 'strong':23, 'lol':24}),
+                ModelInfo(id='amazinGood', name='amazinGood', spker_id=0, gender='female',description='20代女性の声、感情抑えめルーズな話し方',
+                          styles={DEFAULT_STYLE:4, 'down':1, 'lol':2, 'ohmygod':3}),
+                ModelInfo(id='calmCloud', name='calmCloud', spker_id=1, gender='female',description='20代女性の声',
+                          styles={DEFAULT_STYLE:10, 'lol':5, 'question':6, 'down':7, 'hate': 8, 'ohmygod':9}),
+                ModelInfo(id='coolcute', name='coolcute', spker_id=2, gender='female',description='20代女性の声',
+                          styles={DEFAULT_STYLE:12, 'ohmygod':11, 'fine':13, 'sad':14}),
+                ModelInfo(id='fineCrystal', name='fineCrystal', spker_id=3, gender='female',description='20代女性の声',
+                          styles={DEFAULT_STYLE:18, 'fine':15, 'ohmygod':16, 'veryfine':17, 'sad':19}),
+                ModelInfo(id='lightFire', name='lightFire', spker_id=4, gender='male',description='20代男性の声',
+                          styles={DEFAULT_STYLE:22, 'question':20, 'hello':21, 'strong':23, 'lol':24}),
             ],
             license='要確認（配布ページ参照）',
             license_url='https://huggingface.co/Mofa-Xingche/girl-style-bert-vits2-JPExtra-models',
@@ -300,7 +304,7 @@ def get_datasets() -> list[DataSet]:
                 path='style_vectors.npy'
             ),
             models=[ModelInfo(id='AbeShinzo', name='安倍晋三', gender='male',description='安倍晋三元首相の音声データを用いたモデル',
-                              styles={'Neutral':0, 'Angry':1, 'Sad':2, 'Noisy':3, 'Clam': 4})],
+                              styles={DEFAULT_STYLE:0, 'Angry':1, 'Sad':2, 'Noisy':3, 'Clam': 4})],
             license='Apache License 2.0',
             license_url='https://www.apache.org/licenses/LICENSE-2.0',
             usage_terms='安倍晋三元首相の音声データを用いたモデルです。フェイクニュース・誹謗中傷・名誉毀損につながる利用、誤解を招くコンテンツ作成は禁止。公序良俗に反する用途や権利侵害の恐れがある利用は避けてください。',
@@ -319,7 +323,7 @@ def get_datasets() -> list[DataSet]:
                 path='style_vectors.npy'
             ),
             models=[ModelInfo(id='sakura-miko', name='さくらみこ', gender='female',
-                              styles={'Neutral':0, 'Happy':1, 'Sad':2, 'Angry':3})],
+                              styles={DEFAULT_STYLE:0, 'Happy':1, 'Sad':2, 'Angry':3})],
             license='配布者条件: 趣味の範囲で利用',
             license_url='https://hololivepro.com/terms/',
             usage_terms='モデルの取得や使い方は自由ですが、趣味の範囲で利用してください。詳細はカバー株式会社の二次創作ガイドライン（https://hololivepro.com/terms/）を確認してください。',
@@ -329,23 +333,11 @@ def get_datasets() -> list[DataSet]:
 TEXT_PREPROCESS_RECOMMENDATION = (
     "【読み上げ前のテキスト前処理の推奨】\n"
     "- アルファベット表記は、できるだけカタカナに変換してから入力してください。\n"
-    "- 読み間違いやすい漢字（例: 「方」「日」など）は、ひらがなに変換してから入力するほうが望ましいです。"
+    "- 読み間違いやすい漢字（例: 「方」「日」など）は、ひらがなに変換してから入力するほうが望ましいです。\n"
+    "# クレジット表記を推奨\n"
+    "- 資料や動画には出来るだけ音声のクレジット表示をお願いします。\n"
+    "   例: CV: モデル名(https://......)"
 )
-
-def print_text_preprocess_recommendation() -> None:
-    print(TEXT_PREPROCESS_RECOMMENDATION)
-
-def print_models_doc() -> int:
-    data_list = get_datasets()
-    print("# --modelオプションで指定できるモデルの一覧です。model-idを指定して下さい。")
-    print("|model-id|model_name|gender|lang|description|")
-    print("|---|---|---|---|---|")
-    for ds in data_list:
-        for model in ds.models:
-            print(f"|{model.id}|{model.name}|{model.gender}|{model.language.name}|{model.description or ''}|")
-    print("")
-    return 0
-
 def get_model_by_id(model_id: str) -> tuple[DataSet|None, ModelInfo|None]:
     data_list = get_datasets()
     for ds in data_list:
@@ -359,29 +351,6 @@ def get_default_model() -> tuple[DataSet, ModelInfo]:
     ds = datasets[0]
     mdl = ds.models[0]
     return ds, mdl
-
-def bbbb( dataset: DataSet, model: ModelInfo) -> None:
-    output_lines = [
-        f"- model_id: {model.id}",
-        f"- model_name: {model.name} gender: {model.gender} lang: {model.language.name}",
-        f"- description: {model.description or '未設定'}",
-        f"- styles: {', '.join([k for k in model.styles.keys()])}",
-        f"- license: {dataset.license or '未設定'}",
-        f"- license_url: {dataset.license_url or '未設定'}",
-        f"- usage_terms: {dataset.usage_terms or '未設定'}",
-        "",
-    ]
-    print("\n".join(output_lines).rstrip())
-
-
-def print_model_info_doc(model_id: str) -> int:
-    dataset, model = get_model_by_id(model_id)
-    if dataset is None or model is None:
-        print(f"モデルが見つかりません: {model_id}", file=sys.stderr)
-        return 1
-
-    bbbb(dataset, model)
-    return 0
 
 def load_model(dataset: DataSet, device: str|None = None) -> SBV2_TTSModel:
 
@@ -406,6 +375,72 @@ def load_model(dataset: DataSet, device: str|None = None) -> SBV2_TTSModel:
     tts_model.load()
     return tts_model
 
+def print_text_preprocess_recommendation() -> None:
+    print(TEXT_PREPROCESS_RECOMMENDATION)
+
+def print_model_list() -> int:
+    data_list = get_datasets()
+    print("# --modelオプションで指定できるモデルの一覧です。model-idを指定して下さい。")
+    print("|model-id|model_name|gender|lang|description|")
+    print("|---|---|---|---|---|")
+    for ds in data_list:
+        for model in ds.models:
+            print(f"|{model.id}|{model.name}|{model.gender}|{model.language.name}|{model.description or ''}|")
+    print("")
+    print(TEXT_PREPROCESS_RECOMMENDATION)
+    print("")
+    return 0
+
+def print_model_info( dataset: DataSet, model: ModelInfo) -> None:
+    output_lines = [
+        f"- model_id: {model.id}",
+        f"- model_name: {model.name} gender: {model.gender} lang: {model.language.name}",
+        f"- description: {model.description or '未設定'}",
+        f"- styles: {', '.join([k for k in model.styles.keys()])}",
+        f"- license: {dataset.license or '未設定'}",
+        f"- license_url: {dataset.license_url or '未設定'}",
+        f"- usage_terms: {dataset.usage_terms or '未設定'}",
+        "",
+    ]
+    print("\n".join(output_lines).rstrip())
+    print("")
+    print(TEXT_PREPROCESS_RECOMMENDATION)
+    print("")
+
+def verify_models():
+    device = "cpu"
+    data_list = get_datasets()
+    for dataset in data_list:
+        print("========================================")
+        print(f"dataset model(s): {[model.id for model in dataset.models]}")
+        tts_model = load_model(dataset, device=device)
+        print("    speakers information :")
+        for style_name,style_id in tts_model.id2spk.items():
+            print(f"        id:{style_name} name:{style_id}")
+        print("    styles information :")
+        for style_name,style_id in tts_model.style2id.items():
+            print(f"        style_name={style_name} style_id={style_id}")
+
+        for model in dataset.models:
+            print(f"    model id:{model.id} name:{model.name} spker_id:{model.spker_id}")
+            if model.spker_id in tts_model.id2spk:
+                speaker_id = model.spker_id
+                speaker_name = tts_model.id2spk[speaker_id]
+                print(f"        speaker_id:{speaker_id} speaker_name:{speaker_name}")
+            else:
+                print(f"        ERROR: speaker_id:{model.spker_id} not found in tts_model")
+            if DEFAULT_STYLE not in model.styles:
+                print(f"        ERROR: default style '{DEFAULT_STYLE}' not found in model.styles")
+            for style_name, style_id in model.styles.items():
+                a = None
+                for k,v in tts_model.style2id.items():
+                    if v == style_id:
+                        a = k
+                if a:
+                    print(f"        style_name:{style_name} style_id:{style_id} => {a}")
+                else:
+                    print(f"        ERROR: style_name:{style_name} style_id:{style_id} not found in tts_model")
+
 def main():
     parser = argparse.ArgumentParser(
         description="Style-Bert-VITS2 CLI",
@@ -413,22 +448,36 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
     )
     parser.add_argument("-?", action="help", help="show this help message and exit")
-    parser.add_argument("--text", action="append", help="input text (repeatable)")
     parser.add_argument("--model", default="amitaro", help="model name")
+    parser.add_argument("--style", type=str, default=None, help=f"speaker style(default: {DEFAULT_STYLE})")
+    parser.add_argument("--speed", type=float, help="speed scale(default: 1.0, 0.5-2.0 recommended)")
+    parser.add_argument("--text", action="append", help="input text (repeatable)")
     parser.add_argument("--output", action="append", help="output wav path (repeatable)")
-    parser.add_argument("--list-models", "--models", action="store_true", dest="list_models", help="list available models")
-    parser.add_argument("--model-info", metavar="MODEL_ID", help="show model info from docs")
-    parser.add_argument("--style", type=str, default=None, help="speaker style")
-    parser.add_argument("--speed", type=float, help="speed scale")
-    parser.add_argument("--sr", type=int, default=24000, help="output sample rate")
+    parser.add_argument("--sr", type=int, default=24000, help="output sample rate(default: 24000)")
+    parser.add_argument("--list-models", action="store_true", dest="list_models", help="list available models")
+    parser.add_argument("--model-info", metavar="MODEL_ID", help="show model info and styles")
+    parser.add_argument("--verify-models", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
 
-    if args.model_info:
-        return print_model_info_doc(args.model_info)
-
+    # --list-models オプション
     if args.list_models:
-        return print_models_doc()
+        return print_model_list()
 
+    # --model-info オプション
+    if args.model_info:
+        dataset, model = get_model_by_id(args.model_info)
+        if dataset is None or model is None:
+            print(f"モデルが見つかりません: {args.model_info}", file=sys.stderr)
+            return 1
+        print_model_info(dataset, model)
+        return 0
+
+    # --verify-models オプション
+    if args.verify_models:
+        verify_models()
+        return 0
+
+    # 入力テキストと出力ファイルの設定
     texts = args.text or ["こんにちは"]
     if args.output is None:
         if len(texts) == 1:
@@ -451,11 +500,13 @@ def main():
         print(f"Model {args.model} not found. Using")
         return 1
 
-    bbbb( dataset, model)
+    style_name = args.style or DEFAULT_STYLE
+    if style_name not in model.styles:
+        print(f"Style '{style_name}' not found in model '{model.id}'.")
+        print(f"Available styles: {', '.join(model.styles.keys())}")
+        return 1
 
-    print(f"num_jobs={len(texts)}")
-    print(f"sample rate={args.sr}")
-    print_text_preprocess_recommendation()
+    print_model_info( dataset, model)
 
     language = model.language
     bert_models.load_model(language, SBV2_TOKENIZER_PATHS[language])
@@ -466,27 +517,23 @@ def main():
 
     speaker_id:int = model.spker_id
     speaker_style:str = list(model.styles.keys())[0]
-    speedScale:float = model.speedScale
-    pitchOffset:float = model.pitchOffset
 
-    # if args.speaker_id in tts_model.id2spk:
-    #     speaker_id = args.speaker_id
-    #     speaker_name = tts_model.id2spk[speaker_id]
-    # elif args.speaker_name in tts_model.spk2id:
-    #     speaker_id = tts_model.spk2id[args.speaker_name]
-    #     speaker_name = args.speaker_name
+    length_ratio = round( 1.0 / model.speedScale, 6 )
+    if args.speed:
+        length_ratio = round( 1.0 / length_ratio / args.speed, 6 )
+    else:
+        length_ratio = round( 1.0 / length_ratio, 6 )
 
-    # if args.speaker_style in tts_model.style2id:
-    #     speaker_style = args.speaker_style
+    length_scale = max(0.5, min(2.0, round( DEFAULT_LENGTH * length_ratio, 2)))
 
-    # if args.speed:
-    #     speedScale = speedScale * args.speed
+    pitch_scale = 1.0 + model.pitchOffset
 
     for idx, (text, output_path) in enumerate(zip(texts, outputs), start=1):
         print(f"[{idx}/{len(texts)}] output={output_path}")
         tts_sr, audio_i16 = tts_model.infer(
             text,
             speaker_id=speaker_id,style=speaker_style,
+            length=length_scale, pitch_scale=pitch_scale,
             # assist_text=self._assist_text,use_assist_text=True
         )
         if tts_sr != args.sr:
@@ -502,19 +549,9 @@ def main():
             wf.setsampwidth(2)
             wf.setframerate(args.sr)
             wf.writeframes(audio_i16.tobytes())
-        print(f"  done: {output_path_obj}")
-
-def dump():
-    device = "cpu"
-    data_list = get_datasets()
-    for dataset in data_list:
-        print(f"dataset model(s): {[model.id for model in dataset.models]}")
-        tts_model = load_model(dataset, device=device)
-        print("speakers information :")
-        for k,v in tts_model.id2spk.items():
-            print(f"id:{k} name:{v}")
-        for k,v in tts_model.style2id.items():
-            print(f"style_name={k} style_id={v}")
+        num_samples = int(audio_i16.shape[0])
+        duration_sec = num_samples / float(args.sr)
+        print(f"  done: {output_path_obj} monaural audio sampling rate:{args.sr} samples={num_samples} duration={duration_sec:.3f}(sec) ")
 
 if __name__ == "__main__":
-    dump() # main()
+    main()
