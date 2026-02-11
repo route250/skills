@@ -15,12 +15,17 @@ if [[ ! -f "${PYPROJECT_TOML}" ]]; then
   exit 1
 fi
 
-find_uv_bin() {
-  local cmd="$1"
-  if command -v "${cmd}" >/dev/null 2>&1; then
-    command -v "${cmd}"
-    return 0
+cmd=uvx
+
+UVX_BIN="${UVX_BIN:-}"
+if [ -n "${UVX_BIN}" ]; then
+  if [ ! -x "${UVX_BIN}" ]; then
+    echo "指定された UVX_BIN が実行可能ではありません: ${UVX_BIN}" >&2
+    exit 1
   fi
+elif command -v "${cmd}" >/dev/null 2>&1; then
+  UVX_BIN=$(command -v "${cmd}")
+else
   for p in \
     "/opt/homebrew/bin/${cmd}" \
     "/usr/local/bin/${cmd}" \
@@ -29,19 +34,13 @@ find_uv_bin() {
     "$HOME/bin/${cmd}"
   do
     if [[ -x "${p}" ]]; then
-      echo "${p}"
-      return 0
+      UVX_BIN="${p}"
+      break
     fi
   done
-  return 1
-}
-
-UVX_BIN="${UVX_BIN:-}"
-if [[ -z "${UVX_BIN}" ]]; then
-  UVX_BIN="$(find_uv_bin uvx || true)"
 fi
 
-if [[ -z "${UVX_BIN}" ]]; then
+if [[ ! -x "${UVX_BIN}" ]]; then
   echo "uvx が見つかりません。PATH を確認するか UVX_BIN で実行ファイルを指定してください。" >&2
   exit 1
 fi
@@ -51,4 +50,15 @@ if [[ $# -eq 0 ]]; then
 fi
 
 # uvx 専用: プロジェクト依存を解決した一時環境で sbv2.py を実行する。
-exec "${UVX_BIN}" --project "${SCRIPT_DIR}" python "${SBV2_PY}" "$@"
+if command -v python3.11 >/dev/null 2>&1; then
+  uvx_python_opt="--python python3.11"
+elif command -v python3.10 >/dev/null 2>&1; then
+  uvx_python_opt="--python python3.10"
+elif command -v python3.12 >/dev/null 2>&1; then
+  uvx_python_opt="--python python3.12"
+else
+  echo "Python 3.10 以降のバージョンが見つかりません。" >&2
+  exit 1
+fi
+
+exec "${UVX_BIN}" $uvx_python_opt --from "${SCRIPT_DIR}" python "${SBV2_PY}" "$@"
