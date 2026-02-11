@@ -1,18 +1,6 @@
-# /// script
-# requires-python = ">=3.10,<3.13"
-# dependencies = [
-#   "style-bert-vits2==2.5.0",
-#   "pyopenjtalk==0.4.1",
-#   "numpy<2.0",
-#   "torch<2.4",
-#   "torchaudio<2.4",
-#   "ctranslate2==4.6.3",
-#   "transformers==4.57.3",
-#   "librosa==0.11.0",
-# ]
-# ///
 
 import sys,os
+import re
 import argparse
 import warnings
 from pathlib import Path
@@ -47,6 +35,8 @@ from style_bert_vits2.tts_model import TTSModel as SBV2_TTSModel
 
 from huggingface_hub import hf_hub_download, snapshot_download
 from huggingface_hub.errors import LocalEntryNotFoundError
+
+import alkana
 
 def download_hf_hub(repo_id: str, path: str|None=None, *, subfolder:str|None=None, cache_dir: str|Path|None=None) -> str:
     # Hugging Face Hubからモデルをダウンロード
@@ -441,6 +431,102 @@ def verify_models():
                 else:
                     print(f"        ERROR: style_name:{style_name} style_id:{style_id} not found in tts_model")
 
+def to_halfwidth(s: str) -> str:
+    trans = str.maketrans(
+        "０１２３４５６７８９"
+        "ＡＢＣＤＥＦＧＨＩＪＫＬＭＮＯＰＱＲＳＴＵＶＷＸＹＺ"
+        "ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔｕｖｗｘｙｚ"
+        "，．！？＃＄％＆ー＝＾〜￥｜＠：＊／＿；＋＜＞（）［］｛｝”“‘’｀",
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz"
+        ",.!?#$%&-=^~¥|@:*/_;+<>()[]{}\"\"''`",
+    )
+    return s.translate(trans)
+
+def to_kana(word: str) -> str:
+    k = alkana.get_kana(word)
+    return k if k else word
+
+def english_to_katakana(text: str) -> str:
+    # 簡易的な英語→カタカナ変換
+    # textから正規表現で英単語を抽出し、辞書で変換
+    def replace_match(match):
+        word = match.group(0).lower()
+        katakana = ""
+        for w in word.replace("-", "_").split("_"):
+            k = to_kana(w)
+            katakana += k if k else w
+        return katakana
+
+    pattern = re.compile(r'\b[a-z_-]+\b', re.IGNORECASE)
+    return pattern.sub(replace_match, text)
+
+def split_to_chunks(sentence: str) -> list[tuple[str,bool]]:
+    # 改行、句点で分割
+    segments = []
+    slen = len(sentence)
+    start = 0
+    for p,c in enumerate(sentence):
+        if p+1==slen or c==sentence[p+1]:
+            continue
+        is_split = 0
+        if c in ("\n","。","、"):
+            is_split = 2
+        elif c in ("、"):
+            is_split = 1
+        elif c in (".","!","?") and sentence[p+1] == " ":
+            is_split = 2
+        if is_split>0:
+            segment = sentence[start:p+1].strip()
+            if segment:
+                segments.append((segment, is_split==2))
+            start = p+1
+    if start < len(sentence):
+        segment = sentence[start:].strip()
+        if segment:
+            segments.append((segment, True))
+    return segments
+
+def split_to_sentences( text: str, width:int = 90 ) -> list[str]:
+    results = []
+    buffer = ""
+    for segment,is_split in split_to_chunks(text):
+        sumlen = len(buffer) + len(segment)
+        if sumlen > width:
+            if buffer:
+                results.append(buffer.strip())
+            buffer = segment + " "
+        buffer += segment
+        if is_split:
+            if buffer:
+                results.append(buffer.strip())
+            buffer = ""
+    if buffer:
+        results.append(buffer.strip())
+    return results
+
+def apply_filter( audio: NDArray[np.int16], sr:int) -> NDArray[np.int16]:
+    # 簡易的なノイズ除去フィルター
+    if audio.size == 0:
+        return audio
+
+    # バンドパスフィルタを適用（人声向け: 120Hz～4000Hz）
+    audio_f32 = audio.astype(np.float32) / 32768.0
+    stft_matrix = librosa.stft(audio_f32)
+
+    # STFTの0軸は周波数ビン
+    n_fft = (stft_matrix.shape[0] - 1) * 2
+    freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
+
+    # 周波数以外の成分をゼロ化
+    mask = (freqs >= 120) & (freqs <= 4000)
+    stft_matrix[~mask, :] = 0
+
+    # 元の長さに合わせて逆変換
+    audio_filtered = librosa.istft(stft_matrix, length=audio_f32.shape[0])
+    return (audio_filtered * 32768.0).clip(min=-32768, max=32767).astype(np.int16)
+
 def main():
     parser = argparse.ArgumentParser(
         description="Style-Bert-VITS2 CLI",
@@ -452,6 +538,7 @@ def main():
     parser.add_argument("--style", type=str, default=None, help=f"speaker style(default: {DEFAULT_STYLE})")
     parser.add_argument("--speed", type=float, help="speed scale(default: 1.0, 0.5-2.0 recommended)")
     parser.add_argument("--text", action="append", help="input text (repeatable)")
+    parser.add_argument("--assist-text", type=str, default=None,help="Auxiliary text that only affects BERT embeddings. Should be short.Affects speaking tone, does not affect text analysis.")
     parser.add_argument("--output", action="append", help="output wav path (repeatable)")
     parser.add_argument("--sr", type=int, default=24000, help="output sample rate(default: 24000)")
     parser.add_argument("--list-models", action="store_true", dest="list_models", help="list available models")
@@ -492,13 +579,14 @@ def main():
                 parser.error(f"TXT ファイル以外は指定できません: {file_path}")
             try:
                 text = path.read_text(encoding="utf-8").strip()
+                text = to_halfwidth(text)
             except OSError as exc:
                 print(f"TXT ファイルを読み込めません: {file_path} ({exc})", file=sys.stderr)
                 return 1
             texts.append(text)
             outputs.append(str(path.with_suffix(".wav")))
     else:
-        texts = args.text or ["こんにちは"]
+        texts = [to_halfwidth(t) for t in (args.text or ["こんにちは"])]
         if args.output is None:
             if len(texts) == 1:
                 outputs = ["output.wav"]
@@ -536,32 +624,77 @@ def main():
     tts_model = load_model(dataset, device=device)
 
     speaker_id:int = model.spker_id
-    speaker_style:str = list(model.styles.keys())[0]
+    speaker_style:str = style_name
 
-    length_ratio = round( 1.0 / model.speedScale, 6 )
-    if args.speed:
-        length_ratio = round( 1.0 / length_ratio / args.speed, 6 )
+    if model.speedScale <= 0:
+        print(f"Model speedScale must be > 0: {model.speedScale}", file=sys.stderr)
+        return 1
+
+    if args.speed is not None:
+        if args.speed <= 0:
+            parser.error("--speed は 0 より大きい値を指定してください。")
+        length_ratio = round(model.speedScale / args.speed, 6)
     else:
-        length_ratio = round( 1.0 / length_ratio, 6 )
+        length_ratio = round(model.speedScale, 6)
 
     length_scale = max(0.5, min(2.0, round( DEFAULT_LENGTH * length_ratio, 2)))
+    if 0.99 < length_scale < 1.01:
+        length_scale = None  # デフォルト値に近い場合は None にする
 
     pitch_scale = 1.0 + model.pitchOffset
+    if 0.99 < pitch_scale < 1.01:
+        pitch_scale = None  # デフォルト値に近い場合は None にする
 
+    assist_text: str|None = None
+    if isinstance(args.assist_text, str) and len(args.assist_text.strip())>0:
+        assist_text = args.assist_text.strip()
+
+    text_max_width = 90
     for idx, (text, output_path) in enumerate(zip(texts, outputs), start=1):
         print(f"[{idx}/{len(texts)}] output={output_path}")
-        tts_sr, audio_i16 = tts_model.infer(
-            text,
-            speaker_id=speaker_id,style=speaker_style,
-            length=length_scale, pitch_scale=pitch_scale,
-            # assist_text=self._assist_text,use_assist_text=True
-        )
-        if tts_sr != args.sr:
-            # print(f"Warning: sample rate mismatch {tts_sr} != {args.sr}")
-            audio_f32 = audio_i16.astype(np.float32) / 32768.0
-            resampled_f32 = librosa.resample(audio_f32, orig_sr=tts_sr, target_sr=args.sr)
-            audio_i16 = (resampled_f32 * 32768.0).clip(min=-32768, max=32767).astype(np.int16)
+        # テキストを分割
+        segments = split_to_sentences(text, width=text_max_width)
 
+        if not segments:
+            print(f"入力テキストが空です: output={output_path}", file=sys.stderr)
+            return 1
+
+        total_audio_i16 = []
+        total_length:int = 0
+        timings: list[tuple[int,int,str]] = []
+        for i,seg in enumerate(segments):
+            kseg = english_to_katakana(seg)
+            if seg!= kseg:
+                print(f"    segment[{i+1}/{len(segments)}] original_text='{seg}' katakana_text='{kseg}'")
+            kwargs = {}
+            if length_scale is not None:
+                kwargs['length'] = length_scale
+            if pitch_scale is not None:
+                kwargs['pitch'] = pitch_scale
+            if assist_text is not None:
+                kwargs['assist_text'] = assist_text
+                kwargs['use_assist_text'] = True
+            tts_sr, audio_i16 = tts_model.infer(
+                kseg,
+                speaker_id=speaker_id,style=speaker_style,
+                **kwargs
+            )
+
+            if tts_sr != args.sr:
+                # print(f"Warning: sample rate mismatch {tts_sr} != {args.sr}")
+                audio_f32 = audio_i16.astype(np.float32) / 32768.0
+                resampled_f32 = librosa.resample(audio_f32, orig_sr=tts_sr, target_sr=args.sr)
+                audio_i16 = (resampled_f32 * 32768.0).clip(min=-32768, max=32767).astype(np.int16)
+            total_audio_i16.append(audio_i16)
+            s0 = total_length
+            s1 = total_length + audio_i16.shape[0]
+            t0 = round(s0 / args.sr, 3)
+            t1 = round(s1 / args.sr, 3)
+            print(f"    segment[{i+1}/{len(segments)}] samples {s0}:{s1} time {t0:.3f}:{t1:.3f} duration: {t1-t0:.3f}s text='{seg}'")
+            timings.append( (s0, s1, seg) )
+            total_length = s1
+
+        audio_i16 = np.concatenate(total_audio_i16, axis=0)
         output_path_obj = Path(output_path)
         output_path_obj.parent.mkdir(parents=True, exist_ok=True)
         with wave.open(str(output_path_obj), "wb") as wf:
@@ -579,12 +712,17 @@ def main():
             f"license: {dataset.license}",
             f"license-url: {dataset.license_url}",
             f"usage-terms: {dataset.usage_terms}",
-            f"text: {text}",
-            f"samples: {num_samples}",
-            f"duration-sec: {duration_sec:.3f}",
+            f"sample-rate: {args.sr}",
+            f"total-text: {text}",
+            f"total-samples: {num_samples}",
+            f"total-duration-sec: {duration_sec:.3f}",
         ]
+        for s0, s1, seg in timings:
+            t0 = round(s0 / args.sr, 3)
+            t1 = round(s1 / args.sr, 3)
+            info_lines.append(f"segment: {s0}-{s1} time {t0}s-{t1}s duration {t1-t0}s text='{seg}'")
         info_path_obj.write_text("\n".join(info_lines) + "\n", encoding="utf-8")
         print(f"  done: {output_path_obj} monaural audio sampling rate:{args.sr} samples={num_samples} duration={duration_sec:.3f}(sec) ")
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
