@@ -342,19 +342,21 @@ def get_default_model() -> tuple[DataSet, ModelInfo]:
     mdl = ds.models[0]
     return ds, mdl
 
-def load_model(dataset: DataSet, device: str|None = None) -> SBV2_TTSModel:
+def load_model(dataset: DataSet, use_gpu: bool) -> SBV2_TTSModel:
 
     a_model_path = dataset.safetensors.download()
     a_config_path = dataset.config.download()
     a_style_vec_path = dataset.style_vectors.download()
 
-    if device is None:
+    if use_gpu:
         if torch.cuda.is_available():
             device = "cuda"
         elif torch.backends.mps.is_available():
             device = "mps"
         else:
             device = "cpu"
+    else:
+        device = "cpu"
 
     tts_model = SBV2_TTSModel(
         device=device,
@@ -398,12 +400,11 @@ def print_model_info( dataset: DataSet, model: ModelInfo) -> None:
     print("")
 
 def verify_models():
-    device = "cpu"
     data_list = get_datasets()
     for dataset in data_list:
         print("========================================")
         print(f"dataset model(s): {[model.id for model in dataset.models]}")
-        tts_model = load_model(dataset, device=device)
+        tts_model = load_model(dataset, False)
         print("    speakers information :")
         for style_name,style_id in tts_model.id2spk.items():
             print(f"        id:{style_name} name:{style_id}")
@@ -506,26 +507,26 @@ def split_to_sentences( text: str, width:int = 90 ) -> list[str]:
         results.append(buffer.strip())
     return results
 
-def apply_filter( audio: NDArray[np.int16], sr:int) -> NDArray[np.int16]:
-    # 簡易的なノイズ除去フィルター
-    if audio.size == 0:
-        return audio
+# def apply_filter( audio: NDArray[np.int16], sr:int) -> NDArray[np.int16]:
+#     # 簡易的なノイズ除去フィルター
+#     if audio.size == 0:
+#         return audio
 
-    # バンドパスフィルタを適用（人声向け: 120Hz～4000Hz）
-    audio_f32 = audio.astype(np.float32) / 32768.0
-    stft_matrix = librosa.stft(audio_f32)
+#     # バンドパスフィルタを適用（人声向け: 120Hz～4000Hz）
+#     audio_f32 = audio.astype(np.float32) / 32768.0
+#     stft_matrix = librosa.stft(audio_f32)
 
-    # STFTの0軸は周波数ビン
-    n_fft = (stft_matrix.shape[0] - 1) * 2
-    freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
+#     # STFTの0軸は周波数ビン
+#     n_fft = (stft_matrix.shape[0] - 1) * 2
+#     freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
 
-    # 周波数以外の成分をゼロ化
-    mask = (freqs >= 120) & (freqs <= 4000)
-    stft_matrix[~mask, :] = 0
+#     # 周波数以外の成分をゼロ化
+#     mask = (freqs >= 120) & (freqs <= 4000)
+#     stft_matrix[~mask, :] = 0
 
-    # 元の長さに合わせて逆変換
-    audio_filtered = librosa.istft(stft_matrix, length=audio_f32.shape[0])
-    return (audio_filtered * 32768.0).clip(min=-32768, max=32767).astype(np.int16)
+#     # 元の長さに合わせて逆変換
+#     audio_filtered = librosa.istft(stft_matrix, length=audio_f32.shape[0])
+#     return (audio_filtered * 32768.0).clip(min=-32768, max=32767).astype(np.int16)
 
 def main():
     parser = argparse.ArgumentParser(
@@ -544,6 +545,7 @@ def main():
     parser.add_argument("--list-models", action="store_true", dest="list_models", help="list available models")
     parser.add_argument("--model-info", metavar="MODEL_ID", help="show model info and styles")
     parser.add_argument("--verify-models", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--gpu", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("files", nargs="*", metavar="TXT", help="input text file(s) (.txt)")
     args = parser.parse_args()
 
@@ -620,8 +622,7 @@ def main():
     bert_models.load_model(language, SBV2_TOKENIZER_PATHS[language])
     bert_models.load_tokenizer(language, SBV2_TOKENIZER_PATHS[language])
 
-    device: str|None = None
-    tts_model = load_model(dataset, device=device)
+    tts_model = load_model(dataset, args.gpu)
 
     speaker_id:int = model.spker_id
     speaker_style:str = style_name
@@ -698,10 +699,10 @@ def main():
         output_path_obj = Path(output_path)
         output_path_obj.parent.mkdir(parents=True, exist_ok=True)
         with wave.open(str(output_path_obj), "wb") as wf:
-            wf.setnchannels(1)
-            wf.setsampwidth(2)
-            wf.setframerate(args.sr)
-            wf.writeframes(audio_i16.tobytes())
+            wf.setnchannels(1) # pylint: disable=no-member
+            wf.setsampwidth(2) # pylint: disable=no-member
+            wf.setframerate(args.sr) # pylint: disable=no-member
+            wf.writeframes(audio_i16.tobytes()) # pylint: disable=no-member
         num_samples = int(audio_i16.shape[0])
         duration_sec = num_samples / float(args.sr)
         info_path_obj = output_path_obj.with_suffix(".info")
